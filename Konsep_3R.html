@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edukasi 3R - Game Interaktif Final+</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: linear-gradient(145deg, #1e3c72, #2b4a7a);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+        }
+        .app-container {
+            width: 100%;
+            max-width: 1300px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(12px);
+            border-radius: 50px;
+            padding: 25px;
+            box-shadow: 0 30px 50px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .page { display: none; animation: fadePop 0.5s ease; }
+        .page.active { display: block; }
+        @keyframes fadePop {
+            0% { opacity: 0; transform: scale(0.95); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        /* Loading */
+        #loading-page {
+            text-align: center; padding: 80px 20px; color: white;
+        }
+        .loader {
+            width: 120px; height: 120px; margin: 0 auto 30px;
+            border: 10px solid rgba(255,255,255,0.2);
+            border-top: 10px solid #4caf50; border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0); } 100% { transform: rotate(360deg); } }
+        .progress-bar {
+            width: 70%; height: 20px; background: #333; border-radius: 30px;
+            margin: 20px auto; overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%; width: 0%; background: linear-gradient(90deg, #f6d365, #fda085);
+            transition: width 0.1s;
+        }
+        #loading-text { font-size: 3rem; font-weight: 800; text-shadow: 2px 2px 10px black; }
+
+        /* Auth */
+        .auth-form {
+            background: rgba(255,255,255,0.95); max-width: 450px; margin: 50px auto;
+            padding: 50px; border-radius: 60px; box-shadow: 0 30px 50px rgba(0,0,0,0.3);
+        }
+        .auth-form h2 { font-size: 2.5rem; color: #1e3c72; margin-bottom: 30px; }
+        .auth-form input {
+            width: 100%; padding: 18px; margin: 15px 0; border: 2px solid #ddd;
+            border-radius: 60px; font-size: 1.2rem;
+        }
+        .auth-form input:focus { border-color: #4caf50; outline: none; box-shadow: 0 0 0 4px rgba(76,175,80,0.3); }
+        .auth-form button {
+            width: 100%; padding: 18px; background: linear-gradient(145deg, #1e3c72, #2a5298);
+            color: white; border: none; border-radius: 60px; font-size: 1.5rem; font-weight: bold;
+            cursor: pointer; margin-top: 20px; transition: 0.2s;
+        }
+        .auth-form button:hover { transform: scale(1.02); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        .auth-link { text-align: center; margin-top: 25px; font-size: 1.2rem; }
+        .auth-link span { color: #1e3c72; font-weight: bold; cursor: pointer; }
+
+        /* Home Header */
+        .header {
+            background: white; padding: 20px 30px; border-radius: 40px;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;
+        }
+        .header h1 { font-size: 2.5rem; color: #1e3c72; }
+        .user-info {
+            display: flex; align-items: center; gap: 20px; background: #f0f0f0;
+            padding: 10px 25px; border-radius: 50px; font-size: 1.3rem;
+        }
+        .user-info button {
+            padding: 10px 25px; background: #f44336; color: white; border: none;
+            border-radius: 40px; cursor: pointer; font-size: 1.1rem;
+        }
+
+        /* Stats */
+        .stats { display: flex; gap: 30px; flex-wrap: wrap; margin-bottom: 30px; }
+        .chart-box, .calculator-box {
+            background: white; flex: 1 1 400px; padding: 25px; border-radius: 40px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+        .calculator-box input, .calculator-box button {
+            padding: 15px; font-size: 1.2rem; border-radius: 30px; border: 2px solid #ddd;
+        }
+        .calculator-box button { background: #4caf50; color: white; border: none; cursor: pointer; }
+
+        /* Carousel */
+        .carousel-container { margin: 40px 0; }
+        .carousel {
+            display: flex; overflow-x: auto; gap: 25px; padding: 20px 0;
+            scroll-snap-type: x mandatory; scroll-behavior: smooth;
+        }
+        .carousel::-webkit-scrollbar { display: none; }
+        .panel {
+            min-width: 320px; background: white; border-radius: 40px; padding: 30px;
+            scroll-snap-align: start; box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+        .panel h3 { font-size: 2rem; margin-bottom: 15px; color: #1e3c72; }
+        .carousel-indicators { display: flex; gap: 15px; justify-content: center; margin-top: 15px; }
+        .indicator {
+            width: 16px; height: 16px; border-radius: 50%; background: rgba(255,255,255,0.4);
+            cursor: pointer; transition: 0.3s;
+        }
+        .indicator.active { background: white; transform: scale(1.3); }
+
+        /* Flip Cards */
+        .cards-section h2 { color: white; font-size: 2.2rem; text-align: center; margin: 50px 0 30px; }
+        .card-container { display: flex; gap: 30px; justify-content: center; flex-wrap: wrap; }
+        .flip-card {
+            width: 260px; height: 340px; perspective: 1500px; cursor: pointer;
+        }
+        .flip-inner {
+            position: relative; width: 100%; height: 100%; transition: transform 0.7s;
+            transform-style: preserve-3d; border-radius: 40px; box-shadow: 0 20px 30px black;
+        }
+        .flip-card.flipped .flip-inner { transform: rotateY(180deg); }
+        .flip-front, .flip-back {
+            position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+            border-radius: 40px; padding: 30px; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; text-align: center;
+        }
+        .flip-front { background: linear-gradient(145deg, #ff9a9e, #fad0c4); color: white; }
+        .flip-front i { font-size: 5rem; margin-bottom: 20px; }
+        .flip-back { background: linear-gradient(145deg, #a1c4fd, #c2e9fb); color: #1e3c72; transform: rotateY(180deg); }
+
+        /* Tombol Ayo Bermain */
+        .play-btn {
+            display: block; width: fit-content; margin: 50px auto; padding: 25px 70px;
+            background: linear-gradient(45deg, #f6d365, #fda085); border: none; border-radius: 80px;
+            font-size: 2.2rem; font-weight: 800; color: white; cursor: pointer;
+            box-shadow: 0 20px 30px black; transition: 0.3s; border: 3px solid white;
+        }
+        .play-btn:hover { transform: scale(1.1) rotate(2deg); }
+
+        /* Menu Game */
+        .game-menu-header {
+            background: white; padding: 25px; border-radius: 40px;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
+        }
+        .score-level { background: #1e3c72; color: white; padding: 15px 30px; border-radius: 60px; font-size: 1.5rem; }
+        .leaderboard { background: white; border-radius: 40px; padding: 25px; margin: 30px 0; }
+        .leaderboard h3 { font-size: 2rem; }
+        .game-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 25px;
+            margin: 30px 0;
+        }
+        .game-card {
+            background: white; padding: 30px 15px; border-radius: 40px; text-align: center;
+            font-size: 1.3rem; font-weight: 600; cursor: pointer; transition: 0.3s;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .game-card:hover { background: linear-gradient(145deg, #667eea, #764ba2); color: white; transform: scale(1.05); }
+        .home-btn {
+            background: #f44336; color: white; border: none; padding: 15px 40px;
+            border-radius: 60px; font-size: 1.5rem; cursor: pointer;
+        }
+
+        /* Game Pages */
+        .game-page {
+            background: white; border-radius: 50px; padding: 40px; min-height: 600px;
+            position: relative;
+        }
+        .game-page h2 { font-size: 2.8rem; color: #1e3c72; margin-bottom: 30px; }
+        .options { display: flex; gap: 20px; flex-wrap: wrap; margin: 30px 0; }
+        .option-btn {
+            padding: 18px 35px; font-size: 1.3rem; border: none; border-radius: 50px;
+            background: #e0e0e0; cursor: pointer; transition: 0.2s;
+        }
+        .option-btn.selected { background: #4caf50; color: white; }
+        .word-letters {
+            font-size: 3.5rem; letter-spacing: 20px; background: #f0f0f0;
+            padding: 20px; border-radius: 40px; margin: 20px 0;
+        }
+        .drag-container { display: flex; gap: 40px; flex-wrap: wrap; }
+        .drag-items { display: flex; flex-direction: column; gap: 15px; }
+        .drag-item {
+            padding: 18px 30px; background: #ffb74d; border-radius: 50px;
+            font-size: 1.5rem; cursor: grab; border: 2px solid #ff9800;
+        }
+        .bins { display: flex; gap: 30px; flex-wrap: wrap; }
+        .bin {
+            width: 180px; height: 180px; background: #ffcc80; border-radius: 30px;
+            display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+            border: 4px dashed #e65100;
+        }
+        .timer { font-size: 3rem; color: #f44336; margin: 20px 0; }
+        .next-btn {
+            background: #2196f3; color: white; border: none; padding: 15px 40px;
+            border-radius: 50px; font-size: 1.3rem; margin: 20px 0; cursor: pointer;
+        }
+        .back-home {
+            position: absolute; bottom: 30px; left: 30px; background: #f44336;
+            color: white; border: none; padding: 15px 30px; border-radius: 40px;
+            font-size: 1.2rem; cursor: pointer;
+        }
+
+        /* Teka Teki Grid */
+        .crossword-grid {
+            display: grid; grid-template-columns: repeat(5, 70px); gap: 8px;
+            justify-content: center; margin: 30px 0;
+        }
+        .crossword-cell {
+            width: 70px; height: 70px; background: #fff9c4; border: 2px solid #1e3c72;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2rem; font-weight: bold; border-radius: 15px;
+        }
+        .crossword-cell input {
+            width: 100%; height: 100%; text-align: center; font-size: 2rem;
+            border: none; background: transparent; outline: none;
+        }
+
+        /* Petugas Rush Canvas */
+        #rush-canvas {
+            width: 100%; height: auto; background: linear-gradient(180deg, #87CEEB, #b0e0e6);
+            border-radius: 40px; box-shadow: 0 20px 30px rgba(0,0,0,0.3);
+            display: block;
+        }
+        .rush-controls {
+            display: flex; gap: 15px; justify-content: center; margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .rush-controls button {
+            padding: 15px 25px; font-size: 1.3rem; border: none; border-radius: 50px;
+            background: #ff9800; color: white; cursor: pointer; font-weight: bold;
+        }
+
+        /* Popup */
+        .popup {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+            background: white; padding: 40px; border-radius: 70px; box-shadow: 0 30px 50px black;
+            z-index: 1000; text-align: center; min-width: 400px; max-width: 600px;
+        }
+        .popup h2 { font-size: 2.5rem; margin-bottom: 20px; color: #1e3c72; }
+        .popup p { font-size: 1.3rem; margin: 30px 0; white-space: pre-line; text-align: left; }
+        .popup button {
+            margin: 10px; padding: 15px 30px; font-size: 1.3rem; border: none;
+            border-radius: 50px; background: #1e3c72; color: white; cursor: pointer;
+        }
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); z-index: 999;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- LOADING -->
+        <div id="loading-page" class="page active">
+            <div class="loader"></div>
+            <h1 style="color:white; font-size:4rem;">Edukasi 3R</h1>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <div id="loading-text">0%</div>
+        </div>
+
+        <!-- LOGIN -->
+        <div id="login-page" class="page">
+            <div class="auth-form">
+                <h2><i class="fas fa-lock"></i> Login</h2>
+                <input type="text" id="login-username" placeholder="Nama Akun">
+                <input type="password" id="login-password" placeholder="Password">
+                <button onclick="login()">Masuk</button>
+                <p class="auth-link">Belum punya akun? <span onclick="showRegister()">Buat Akun</span></p>
+            </div>
+        </div>
+
+        <!-- REGISTER -->
+        <div id="register-page" class="page">
+            <div class="auth-form">
+                <h2><i class="fas fa-user-plus"></i> Buat Akun</h2>
+                <input type="text" id="reg-username" placeholder="Nama Akun">
+                <input type="password" id="reg-password" placeholder="Password">
+                <button onclick="register()">Daftar</button>
+                <p class="auth-link">Sudah punya akun? <span onclick="showLogin()">Login</span></p>
+            </div>
+        </div>
+
+        <!-- HOME -->
+        <div id="home-page" class="page">
+            <div class="header">
+                <h1><i class="fas fa-recycle"></i> 3R Learning</h1>
+                <div class="user-info">
+                    <span id="username-display"></span>
+                    <button onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                </div>
+            </div>
+            <div class="stats">
+                <div class="chart-box">
+                    <h3>📊 Sampah 10 Tahun (juta ton)</h3>
+                    <canvas id="wasteChart" style="max-height:300px;"></canvas>
+                </div>
+                <div class="calculator-box">
+                    <h3>🧮 Kalkulator Sampah</h3>
+                    <div style="display:flex; gap:15px; flex-wrap:wrap;">
+                        <input type="number" id="family-count" min="1" value="4" style="flex:1;">
+                        <button onclick="hitungSampah()">Hitung</button>
+                    </div>
+                    <p style="font-size:1.5rem;">Harian: <span id="calc-result">0 kg</span></p>
+                    <p style="font-size:1.5rem;">Bulanan: <span id="calc-month">0 kg</span></p>
+                </div>
+            </div>
+
+            <!-- CAROUSEL -->
+            <div class="carousel-container">
+                <div class="carousel" id="edu-carousel">
+                    <div class="panel"><h3>♻️ Apa Itu 3R?</h3><p><strong>Reduce</strong> (Mengurangi)<br><strong>Reuse</strong> (Memakai ulang)<br><strong>Recycle</strong> (Daur ulang)<br>Tujuan: kurangi sampah 🌍</p></div>
+                    <div class="panel"><h3>1️⃣ Reduce</h3><p>Mengurangi penggunaan barang sekali pakai. Contoh: bawa tas belanja, pakai botol minum isi ulang.</p></div>
+                    <div class="panel"><h3>2️⃣ Reuse</h3><p>Gunakan kembali barang layak pakai. Contoh: botol kaca jadi pot, kertas bekas jadi catatan.</p></div>
+                    <div class="panel"><h3>3️⃣ Recycle</h3><p>Mendaur ulang sampah menjadi produk baru. Contoh: kertas, plastik, logam.</p></div>
+                    <div class="panel"><h3>🌱 Manfaat 3R</h3><p>Hemat sumber daya, kurangi polusi, kurangi sampah, selamatkan bumi.</p></div>
+                    <div class="panel"><h3>💡 Kenapa 3R Penting?</h3><p>Sampah mencemari tanah, air, udara. 3R solusi utama.</p></div>
+                </div>
+                <div class="carousel-indicators" id="carousel-indicators"></div>
+            </div>
+
+            <!-- FLIP CARDS -->
+            <div class="cards-section">
+                <h2>Masih bingung jenis sampah?</h2>
+                <div class="card-container">
+                    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-inner">
+                            <div class="flip-front"><i class="fas fa-apple-alt"></i><h2>Organik</h2></div>
+                            <div class="flip-back"><h3>Organik</h3><p>Sampah mudah membusuk. Contoh: sisa makanan, daun. Jadi kompos.</p></div>
+                        </div>
+                    </div>
+                    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-inner">
+                            <div class="flip-front"><i class="fas fa-box"></i><h2>Anorganik</h2></div>
+                            <div class="flip-back"><h3>Anorganik</h3><p>Sampah sulit membusuk. Contoh: plastik, botol. Didaur ulang.</p></div>
+                        </div>
+                    </div>
+                    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-inner">
+                            <div class="flip-front"><i class="fas fa-skull-crossbones"></i><h2>B3</h2></div>
+                            <div class="flip-back"><h3>B3</h3><p>Berbahaya & beracun. Contoh: baterai, pestisida. Kelola khusus.</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="play-btn" onclick="goToMenuGame()">🎮 Ayo Bermain!</button>
+        </div>
+
+        <!-- MENU GAME -->
+        <div id="menu-game-page" class="page">
+            <div class="game-menu-header">
+                <h2 style="color:#1e3c72;">📋 Menu Game</h2>
+                <div class="score-level">Score: <span id="score">0</span> | Level: <span id="level">1</span></div>
+            </div>
+            <div class="leaderboard">
+                <h3>🏆 Top 10 Leaderboard</h3>
+                <ol id="leaderboard-list"></ol>
+            </div>
+            <div class="game-grid">
+                <div class="game-card" onclick="goToGame('pilahan')">🗑️ Pilah Sampah</div>
+                <div class="game-card" onclick="goToGame('reduce')">📉 Reduce Mission</div>
+                <div class="game-card" onclick="goToGame('word')">🔤 Word Reuse</div>
+                <div class="game-card" onclick="goToGame('dragdrop')">🖱️ Drag & Drop</div>
+                <div class="game-card" onclick="goToGame('cerdas')">🧠 Cerdas 3R</div>
+                <div class="game-card" onclick="goToGame('teka')">🕵️ Teka-Teki 3R</div>
+                <div class="game-card" onclick="goToGame('rush')">🏃 Petugas Rush</div>
+            </div>
+            <button class="home-btn" onclick="goToHome()"><i class="fas fa-home"></i> Home</button>
+        </div>
+
+        <!-- GAME PILAH SAMPAH -->
+        <div id="game-pilahan" class="page game-page">
+            <h2>🗑️ Pilah Sampah</h2>
+            <p id="pilahan-question" style="font-size:2rem;">Botol plastik termasuk?</p>
+            <div class="options" id="pilahan-options">
+                <button class="option-btn" onclick="jawabPilahan('organik')">Organik</button>
+                <button class="option-btn" onclick="jawabPilahan('anorganik')">Anorganik</button>
+                <button class="option-btn" onclick="jawabPilahan('b3')">B3</button>
+            </div>
+            <div id="pilahan-feedback" style="font-size:2rem; margin:20px 0;"></div>
+            <button class="next-btn" onclick="nextPilahan()">▶️ Lanjut Soal</button>
+            <button class="back-home" onclick="goToMenuGame()">Menu</button>
+        </div>
+
+        <!-- GAME REDUCE MISSION -->
+        <div id="game-reduce" class="page game-page">
+            <h2>📉 Reduce Mission</h2>
+            <p id="reduce-question" style="font-size:1.8rem;">Langkah mengurangi sampah plastik?</p>
+            <div class="options" id="reduce-options"></div>
+            <div id="reduce-feedback" style="font-size:2rem;"></div>
+            <button class="next-btn" onclick="nextReduce()">▶️ Lanjut Soal</button>
+            <button class="back-home" onclick="goToMenuGame()">Menu</button>
+        </div>
+
+        <!-- GAME WORD REUSE -->
+        <div id="game-word" class="page game-page">
+            <h2>🔤 Word Reuse</h2>
+            <div class="word-letters" id="word-letters">REUSE</div>
+            <input type="text" id="word-input" placeholder="Jawabanmu" style="padding:20px; font-size:2rem; width:100%; border-radius:60px;">
+            <button onclick="checkWord()" style="padding:20px 40px; font-size:1.5rem; margin:20px;">Cek</button>
+            <div id="word-feedback" style="font-size:2rem;"></div>
+            <button class="back-home" onclick="goToMenuGame()">Menu</button>
+        </div>
+
+        <!-- GAME DRAG & DROP -->
+        <div id="game-dragdrop" class="page game-page">
+            <h2>🖱️ Drag & Drop</h2>
+            <div class="drag-container">
+                <div class="drag-items" id="drag-items"></div>
+                <div class="bins">
+                    <div class="bin" ondrop="drop(event)" ondragover="allowDrop(event)" data-type="organik">Organik</div>
+                    <div class="bin" ondrop="drop(event)" ondragover="allowDrop(event)" data-type="anorganik">Anorganik</div>
+                    <div class="bin" ondrop="drop(event)" ondragover="allowDrop(event)" data-type="b3">B3</div>
+                </div>
+            </div>
+            <div id="drag-feedback" style="font-size:2rem;"></div>
+            <button class="next-btn" onclick="nextDrag()">▶️ Sampah Baru</button>
+            <button class="back-home" onclick="goToMenuGame()">Menu</button>
+        </div>
+
+        <!-- GAME CERDAS 3R -->
+        <div id="game-cerdas" class="page game-page">
+            <h2>🧠 Cerdas 3R</h2>
+            <div class="timer" id="timer">10:00</div>
+            <p id="soal" style="font-size:2rem;">Soal 1: Apa kepanjangan 3R?</p>
+            <div class="options" id="soal-options"></div>
+            <div id="cerdas-feedback"></div>
+            <button class="back-home" onclick="goToMenuGame()">Menu</button>
+        </div>
+
+        <!-- GAME TEKA TEKI 3R (dengan grid) -->
+        <div id="game-teka" class="page game-page">
+            <h2>🕵️ Teka-Teki 3R</h2>
+            <p style="font-size:1.3rem;">Mendatar (baris 1): proses menggunakan kembali (5 huruf)</p>
+            <p style="font-size:1.3rem;">Menurun (kolom 3): tempat pembuangan akhir (3 huruf)</p>
+            <div class="crossword-grid" id="crossword-grid"></div>
+            <button onclick="cekTekaGrid()" style="padding:15px 30px; font-size:1.3rem;">Cek Jawaban</button>
+            <div id="teka-feedback" style="font-size:1.5rem;"></div>
+            <button class="back-home" onclick="goToMenuGame()">Menu</button>
+        </div>
+
+        <!-- GAME PETUGAS RUSH -->
+        <div id="game-rush" class="page game-page">
+            <h2>🏃 Petugas Rush</h2>
+            <div style="display: flex; gap: 20px; margin-bottom: 20px; flex-wrap:wrap;">
+                <div class="options" style="flex:1;">
+                    <p>Pilih karakter:</p>
+                    <button class="option-btn" onclick="pilihKarakter('organik')">🧑‍🌾 Organik</button>
+                    <button class="option-btn" onclick="pilihKarakter('anorganik')">🧑‍🔧 Anorganik</button>
+                    <button class="option-btn" onclick="pilihKarakter('b3')">👨‍⚕️ B3</button>
+                </div>
+                <div style="background: #1e3c72; padding: 20px; border-radius: 40px; color: white; min-width:150px;">
+                    <p>Skor: <span id="rush-score">0</span></p>
+                    <p>Level: <span id="rush-level">1</span></p>
+                </div>
+            </div>
+            <canvas id="rush-canvas" width="1000" height="400"></canvas>
+            <div class="rush-controls">
+                <button onclick="gerakKiri()">⬅️ Kiri</button>
+                <button onclick="gerakKanan()">➡️ Kanan</button>
+                <button onclick="lompat()">🦘 Lompat (Spasi)</button>
+                <button onclick="menunduk()">⬇️ Menunduk</button>
+                <button onclick="pauseGame()">⏸️ Pause</button>
+            </div>
+            <p id="rush-status" style="font-size:1.3rem; text-align:center;"></p>
+            <button class="back-home" onclick="goToMenuGame()">Menu</button>
+        </div>
+
+        <!-- POPUP -->
+        <div id="overlay" class="overlay" style="display:none;"></div>
+        <div id="popup" class="popup" style="display:none;"></div>
+    </div>
+
+    <script>
+        // ================== GLOBAL ==================
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        let currentUser = null;
+        let score = 0;
+        let level = 1;
+        let loadingInterval;
+        let carouselInterval;
+        let chart;
+
+        const wasteData = {
+            tahun: [2015,2016,2017,2018,2019,2020,2021,2022,2023,2024],
+            total: [65,67,70,72,74,76,78,80,82,85],
+            daurUlang: [10,12,15,18,20,23,27,30,34,38]
+        };
+
+        // Aturan main game
+        const gameRules = {
+            pilahan: "🧩 **Aturan Pilah Sampah**\n\nKamu akan diberikan pertanyaan tentang jenis sampah. Pilih jawaban yang benar (Organik, Anorganik, atau B3). Setiap jawaban benar mendapat +10 poin. Klik tombol 'Lanjut Soal' untuk soal berikutnya.",
+            reduce: "♻️ **Aturan Reduce Mission**\n\nPilih langkah yang paling tepat untuk mengurangi sampah sesuai pertanyaan. Jawaban benar = +10 poin. Gunakan tombol 'Lanjut Soal' untuk ganti soal.",
+            word: "🔤 **Aturan Word Reuse**\n\nTersedia huruf acak. Susun menjadi kata yang benar terkait 3R. Jika benar, dapat +10 poin dan kata baru akan muncul.",
+            dragdrop: "🖱️ **Aturan Drag & Drop**\n\nSeret sampah ke tong yang sesuai dengan jenisnya. Jika benar, sampah akan menghilang dan mendapat +10 poin. Klik 'Sampah Baru' untuk mencoba item lain.",
+            cerdas: "🧠 **Aturan Cerdas 3R**\n\nTerdapat 10 soal pilihan ganda. Kamu punya waktu 10 menit. Setiap jawaban benar memberi +10 poin. Di akhir akan tampil skor total.",
+            teka: "🕵️ **Aturan Teka-Teki 3R**\n\nIsi kotak-kotak yang tersedia. Mendatar (baris 1) adalah kata REUSE, menurun (kolom 3) adalah kata TPA. Setelah diisi semua, klik 'Cek Jawaban'. Jika benar mendapat +50 poin.",
+            rush: "🏃 **Aturan Petugas Rush**\n\nPilih karaktermu (Organik/Anorganik/B3). Kumpulkan sampah yang sesuai dengan karaktermu dengan bergerak kiri/kanan, lompat (Spasi), dan menunduk (Panah Bawah). Hindari sampah yang salah! Skor bertambah +10 setiap ambil benar. Setiap 50 poin naik level (sampah makin cepat)."
+        };
+
+        // ================== LOADING ==================
+        window.onload = function() {
+            startLoading();
+            if(users.length===0) users.push({username:'demo',password:'123'});
+            localStorage.setItem('users',JSON.stringify(users));
+        };
+
+        function startLoading() {
+            let progress = 0;
+            const fill = document.getElementById('progress-fill');
+            const text = document.getElementById('loading-text');
+            loadingInterval = setInterval(() => {
+                progress += 1;
+                fill.style.width = progress + '%';
+                text.innerText = progress + '%';
+                if(progress >= 100) {
+                    clearInterval(loadingInterval);
+                    setTimeout(showLogin, 500);
+                }
+            }, 30);
+        }
+
+        // ================== AUTH ==================
+        function showLogin() {
+            document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+            document.getElementById('login-page').classList.add('active');
+        }
+        function showRegister() {
+            document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+            document.getElementById('register-page').classList.add('active');
+        }
+        function register() {
+            const username = document.getElementById('reg-username').value.trim();
+            const password = document.getElementById('reg-password').value.trim();
+            if(!username||!password) return alert('Isi semua field!');
+            let users = JSON.parse(localStorage.getItem('users')) || [];
+            if(users.find(u=>u.username===username)) return alert('Username sudah ada!');
+            users.push({username,password});
+            localStorage.setItem('users',JSON.stringify(users));
+            alert('Akun dibuat! Silakan login.');
+            document.getElementById('login-username').value = username;
+            document.getElementById('login-password').value = '';
+            showLogin();
+        }
+        function login() {
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value.trim();
+            if(!username||!password) return alert('Isi semua field!');
+            let users = JSON.parse(localStorage.getItem('users')) || [];
+            const user = users.find(u=>u.username===username && u.password===password);
+            if(user) {
+                currentUser = username;
+                document.getElementById('username-display').innerText = username;
+                let saved = localStorage.getItem('score_'+username);
+                score = saved ? parseInt(saved) : 0;
+                document.getElementById('score').innerText = score;
+                level = Math.floor(score/100)+1;
+                document.getElementById('level').innerText = level;
+                goToHome();
+            } else alert('Username/password salah!');
+        }
+        function logout() { currentUser=null; showLogin(); }
+
+        // ================== HOME ==================
+        function goToHome() {
+            document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+            document.getElementById('home-page').classList.add('active');
+            initChart();
+            startCarousel();
+        }
+        function initChart() {
+            const ctx = document.getElementById('wasteChart').getContext('2d');
+            if(chart) chart.destroy();
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: wasteData.tahun,
+                    datasets: [
+                        { label:'Total Sampah', data:wasteData.total, backgroundColor:'#f44336' },
+                        { label:'Daur Ulang', data:wasteData.daurUlang, backgroundColor:'#4caf50' }
+                    ]
+                },
+                options: { responsive:true, maintainAspectRatio:true }
+            });
+        }
+        function hitungSampah() {
+            let anggota = document.getElementById('family-count').value;
+            if(anggota<1) anggota=1;
+            let harian = anggota * 0.7;
+            document.getElementById('calc-result').innerText = harian.toFixed(2)+' kg';
+            document.getElementById('calc-month').innerText = (harian*30).toFixed(2)+' kg';
+        }
+
+        // ================== CAROUSEL ==================
+        function startCarousel() {
+            const carousel = document.getElementById('edu-carousel');
+            const panels = document.querySelectorAll('.panel');
+            const ind = document.getElementById('carousel-indicators');
+            ind.innerHTML = '';
+            panels.forEach((_,i)=>{
+                let dot = document.createElement('span');
+                dot.className = 'indicator';
+                dot.onclick = ()=> carousel.scrollTo({ left: panels[i].offsetLeft-carousel.offsetLeft, behavior:'smooth' });
+                ind.appendChild(dot);
+            });
+            let idx = 0;
+            if(carouselInterval) clearInterval(carouselInterval);
+            carouselInterval = setInterval(()=>{
+                idx = (idx+1)%panels.length;
+                carousel.scrollTo({ left: panels[idx].offsetLeft-carousel.offsetLeft, behavior:'smooth' });
+                document.querySelectorAll('.indicator').forEach((d,i)=> d.classList.toggle('active', i===idx));
+            },3000);
+        }
+
+        // ================== LEADERBOARD ==================
+        function updateLeaderboard() {
+            let all = [];
+            for(let u of users) {
+                let s = localStorage.getItem('score_'+u.username);
+                if(s) all.push({user:u.username, score:parseInt(s)});
+            }
+            all.sort((a,b)=>b.score - a.score);
+            let list = document.getElementById('leaderboard-list');
+            list.innerHTML = '';
+            for(let i=0; i<Math.min(10,all.length); i++) {
+                list.innerHTML += `<li>${all[i].user} - ${all[i].score} poin</li>`;
+            }
+            if(!all.length) list.innerHTML = '<li>Belum ada skor</li>';
+        }
+
+        // ================== MENU GAME & ATURAN ==================
+        function goToMenuGame() {
+            updateLeaderboard();
+            document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+            document.getElementById('menu-game-page').classList.add('active');
+        }
+
+        function goToGame(game) {
+            window.currentGame = game;
+            showGameRules(game);
+        }
+
+        function showGameRules(gameId) {
+            const rules = gameRules[gameId] || "Selamat bermain!";
+            const popup = document.getElementById('popup');
+            const overlay = document.getElementById('overlay');
+            
+            popup.style.display = 'block';
+            overlay.style.display = 'block';
+            
+            popup.innerHTML = `
+                <h2>📋 Aturan Main</h2>
+                <p>${rules.replace(/\n/g, '<br>')}</p>
+                <button onclick="startGame('${gameId}')">🚀 Mulai Game</button>
+            `;
+        }
+
+        function startGame(gameId) {
+            document.getElementById('popup').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+            
+            document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+            document.getElementById('game-'+gameId).classList.add('active');
+            
+            if(gameId === 'pilahan') resetPilahan();
+            if(gameId === 'reduce') resetReduce();
+            if(gameId === 'word') acakWord();
+            if(gameId === 'dragdrop') resetDrag();
+            if(gameId === 'cerdas') startCerdas();
+            if(gameId === 'teka') buatGridTeka();
+            if(gameId === 'rush') initRush();
+        }
+
+        function tambahScore(poin) {
+            score += poin;
+            document.getElementById('score').innerText = score;
+            if(currentUser) localStorage.setItem('score_'+currentUser, score);
+            level = Math.floor(score/100)+1;
+            document.getElementById('level').innerText = level;
+        }
+
+        // ================== GAME PILAH SAMPAH ==================
+        const pilahanBank = [
+            { soal: "Botol plastik termasuk?", jawab: "anorganik" },
+            { soal: "Sisa sayuran termasuk?", jawab: "organik" },
+            { soal: "Baterai bekas termasuk?", jawab: "b3" },
+            { soal: "Koran bekas termasuk?", jawab: "anorganik" },
+            { soal: "Kulit pisang termasuk?", jawab: "organik" }
+        ];
+        let pilahanIndex = 0;
+        function resetPilahan() {
+            pilahanIndex = 0;
+            document.getElementById('pilahan-question').innerText = pilahanBank[0].soal;
+            document.getElementById('pilahan-feedback').innerText = '';
+        }
+        function jawabPilahan(jwb) {
+            let benar = (jwb === pilahanBank[pilahanIndex].jawab);
+            document.getElementById('pilahan-feedback').innerText = benar ? '✅ Benar! +10' : '❌ Salah!';
+            if(benar) tambahScore(10);
+        }
+        function nextPilahan() {
+            pilahanIndex = (pilahanIndex + 1) % pilahanBank.length;
+            document.getElementById('pilahan-question').innerText = pilahanBank[pilahanIndex].soal;
+            document.getElementById('pilahan-feedback').innerText = '';
+        }
+
+        // ================== GAME REDUCE MISSION ==================
+        const reduceBank = [
+            { soal: "Cara mengurangi sampah plastik?", options:["Pakai tas kain","Bungkus pakai plastik","Beli air kemasan"], jawab:0 },
+            { soal: "Mengurangi sampah makanan?", options:["Masak sesuai porsi","Buang sisa","Beli berlebihan"], jawab:0 },
+            { soal: "Mengurangi penggunaan kertas?", options:["Baca online","Cetak semua","Pakai tisu"], jawab:0 }
+        ];
+        let reduceIndex = 0;
+        function resetReduce() {
+            reduceIndex = 0;
+            tampilReduceSoal();
+        }
+        function tampilReduceSoal() {
+            let s = reduceBank[reduceIndex];
+            document.getElementById('reduce-question').innerText = s.soal;
+            let div = document.getElementById('reduce-options');
+            div.innerHTML = '';
+            s.options.forEach((opt,i)=>{
+                let btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = ()=> jawabReduce(i);
+                div.appendChild(btn);
+            });
+            document.getElementById('reduce-feedback').innerText = '';
+        }
+        function jawabReduce(pil) {
+            let benar = (pil === reduceBank[reduceIndex].jawab);
+            document.getElementById('reduce-feedback').innerText = benar ? '✅ Benar! +10' : '❌ Salah!';
+            if(benar) tambahScore(10);
+        }
+        function nextReduce() {
+            reduceIndex = (reduceIndex + 1) % reduceBank.length;
+            tampilReduceSoal();
+        }
+
+        // ================== GAME WORD REUSE ==================
+        const kataKata = ["REUSE","REDUCE","RECYCLE","SAMPAH","ORGANIK","ANORGANIK","B3"];
+        let kataNow = "REUSE";
+        function acakWord() {
+            kataNow = kataKata[Math.floor(Math.random()*kataKata.length)];
+            let acak = kataNow.split('').sort(()=>Math.random()-0.5).join('');
+            document.getElementById('word-letters').innerText = acak;
+            document.getElementById('word-input').value = '';
+            document.getElementById('word-feedback').innerText = '';
+        }
+        function checkWord() {
+            let jwb = document.getElementById('word-input').value.trim().toUpperCase();
+            if(jwb === kataNow) {
+                document.getElementById('word-feedback').innerText = '✅ Benar! +10';
+                tambahScore(10);
+                acakWord();
+            } else document.getElementById('word-feedback').innerText = '❌ Coba lagi';
+        }
+
+        // ================== GAME DRAG & DROP ==================
+        const dragItems = [
+            { nama: "🍎 Apel", jenis: "organik" },
+            { nama: "🥤 Botol", jenis: "anorganik" },
+            { nama: "🔋 Baterai", jenis: "b3" },
+            { nama: "🍌 Kulit Pisang", jenis: "organik" },
+            { nama: "📦 Kardus", jenis: "anorganik" },
+            { nama: "💡 Lampu Bekas", jenis: "b3" }
+        ];
+        let dragCurrent = [];
+        function resetDrag() {
+            dragCurrent = dragItems.slice(0,3);
+            renderDragItems();
+            document.getElementById('drag-feedback').innerText = '';
+        }
+        function renderDragItems() {
+            let container = document.getElementById('drag-items');
+            container.innerHTML = '';
+            dragCurrent.forEach((item,idx)=>{
+                let div = document.createElement('div');
+                div.id = 'drag-'+idx;
+                div.className = 'drag-item';
+                div.setAttribute('draggable','true');
+                div.setAttribute('data-type', item.jenis);
+                div.ondragstart = drag;
+                div.innerText = item.nama;
+                container.appendChild(div);
+            });
+        }
+        function allowDrop(ev) { ev.preventDefault(); }
+        function drag(ev) {
+            ev.dataTransfer.setData('text', ev.target.id);
+            ev.dataTransfer.setData('type', ev.target.dataset.type);
+        }
+        function drop(ev) {
+            ev.preventDefault();
+            let id = ev.dataTransfer.getData('text');
+            let type = ev.dataTransfer.getData('type');
+            let bin = ev.target.dataset.type;
+            if(type === bin) {
+                document.getElementById('drag-feedback').innerText = '✅ Benar! +10';
+                tambahScore(10);
+                document.getElementById(id).style.opacity = '0.4';
+                document.getElementById(id).draggable = false;
+            } else {
+                document.getElementById('drag-feedback').innerText = '❌ Salah tong!';
+            }
+        }
+        function nextDrag() {
+            dragCurrent = [dragItems[Math.floor(Math.random()*dragItems.length)]];
+            renderDragItems();
+            document.getElementById('drag-feedback').innerText = '';
+        }
+
+        // ================== GAME CERDAS 3R ==================
+        const soalCerdas = [
+            { soal: "Apa kepanjangan 3R?", options: ["Reduce, Reuse, Recycle", "Redo, Remove, Reheat", "Rename, Retry, Reload"], jawaban: 0 },
+            { soal: "Contoh kegiatan Reduce?", options: ["Bawa tas belanja", "Membuang sampah", "Membakar sampah"], jawaban: 0 },
+            { soal: "Botol kaca jadi pot, contoh?", options: ["Recycle", "Reuse", "Reduce"], jawaban: 1 },
+            { soal: "Sampah organik bisa jadi?", options: ["Kompos", "Plastik", "Logam"], jawaban: 0 },
+            { soal: "Baterai bekas termasuk?", options: ["Organik", "Anorganik", "B3"], jawaban: 2 },
+            { soal: "Tujuan 3R?", options: ["Mengurangi sampah", "Menambah sampah", "Membakar"], jawaban: 0 },
+            { soal: "Kertas bekas didaur ulang, contoh?", options: ["Reduce", "Reuse", "Recycle"], jawaban: 2 },
+            { soal: "Sedotan stainless termasuk?", options: ["Reduce", "Reuse", "Recycle"], jawaban: 0 },
+            { soal: "Contoh Reuse?", options: ["Beli minuman kemasan", "Botol bekas jadi tempat minum", "Buang baju"], jawaban: 1 },
+            { soal: "Dampak sampah tidak dikelola?", options: ["Pencemaran", "Kesehatan naik", "Hewan senang"], jawaban: 0 }
+        ];
+        let cerdasIndex = 0, cerdasBenar = 0, cerdasTimer, cerdasSeconds = 600;
+        function startCerdas() {
+            cerdasIndex = 0; cerdasBenar = 0; cerdasSeconds = 600;
+            updateTimerDisplay();
+            clearInterval(cerdasTimer);
+            cerdasTimer = setInterval(()=>{
+                cerdasSeconds--;
+                updateTimerDisplay();
+                if(cerdasSeconds<=0) {
+                    clearInterval(cerdasTimer);
+                    showGenericPopup('⏰ Waktu habis! Skor: '+cerdasBenar*10, 'menu');
+                }
+            },1000);
+            tampilSoalCerdas();
+        }
+        function updateTimerDisplay() {
+            let m = Math.floor(cerdasSeconds/60);
+            let d = cerdasSeconds%60;
+            document.getElementById('timer').innerText = `${m}:${d<10?'0':''}${d}`;
+        }
+        function tampilSoalCerdas() {
+            if(cerdasIndex >= soalCerdas.length) {
+                clearInterval(cerdasTimer);
+                showGenericPopup('🎉 Selesai! Skor: '+cerdasBenar*10, 'menu');
+                return;
+            }
+            let s = soalCerdas[cerdasIndex];
+            document.getElementById('soal').innerText = `Soal ${cerdasIndex+1}: ${s.soal}`;
+            let optDiv = document.getElementById('soal-options');
+            optDiv.innerHTML = '';
+            s.options.forEach((opt,i)=>{
+                let btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = ()=> jawabCerdas(i);
+                optDiv.appendChild(btn);
+            });
+        }
+        function jawabCerdas(pil) {
+            if(pil === soalCerdas[cerdasIndex].jawaban) {
+                cerdasBenar++;
+                tambahScore(10);
+                document.getElementById('cerdas-feedback').innerText = '✅ Benar!';
+            } else {
+                document.getElementById('cerdas-feedback').innerText = '❌ Salah!';
+            }
+            cerdasIndex++;
+            tampilSoalCerdas();
+        }
+
+        // ================== GAME TEKA TEKI GRID ==================
+        function buatGridTeka() {
+            let grid = document.getElementById('crossword-grid');
+            grid.innerHTML = '';
+            for(let r=0; r<5; r++) {
+                for(let c=0; c<5; c++) {
+                    let cell = document.createElement('div');
+                    cell.className = 'crossword-cell';
+                    if(r===0 && c<5) {
+                        let inp = document.createElement('input');
+                        inp.maxLength = 1;
+                        inp.id = `teka_${r}_${c}`;
+                        cell.appendChild(inp);
+                    } else if(c===2 && r<3) {
+                        let inp = document.createElement('input');
+                        inp.maxLength = 1;
+                        inp.id = `teka_${r}_${c}`;
+                        cell.appendChild(inp);
+                    } else {
+                        cell.style.background = '#ccc';
+                        cell.innerText = '⬛';
+                    }
+                    grid.appendChild(cell);
+                }
+            }
+        }
+        function cekTekaGrid() {
+            let mendatar = '';
+            for(let c=0; c<5; c++) {
+                let inp = document.getElementById(`teka_0_${c}`);
+                if(inp) mendatar += inp.value.toUpperCase();
+            }
+            let menurun = '';
+            for(let r=0; r<3; r++) {
+                let inp = document.getElementById(`teka_${r}_2`);
+                if(inp) menurun += inp.value.toUpperCase();
+            }
+            if(mendatar === 'REUSE' && menurun === 'TPA') {
+                showGenericPopup('🎉 Selamat! Teka-teki selesai!', 'teka');
+                tambahScore(50);
+            } else {
+                document.getElementById('teka-feedback').innerText = 'Jawaban belum tepat';
+            }
+        }
+
+        // ================== GAME PETUGAS RUSH (karakter orang) ==================
+        let rushCanvas, ctx;
+        let player = {
+            x: 100, y: 0, width: 40, height: 70,
+            type: '', state: 'stand',
+            vy: 0, groundY: 0, jumpPower: -12, gravity: 0.6,
+            frame: 0, direction: 1
+        };
+        let sampahItems = [];
+        let gameOver = false, paused = false;
+        let rushScore = 0, rushLevel = 1;
+        let rushInterval, animFrame;
+
+        function initRush() {
+            rushCanvas = document.getElementById('rush-canvas');
+            ctx = rushCanvas.getContext('2d');
+            player.y = rushCanvas.height - 100 - player.height;
+            player.groundY = player.y;
+            player.state = 'stand';
+            player.vy = 0;
+            player.type = '';
+            player.direction = 1;
+            sampahItems = [];
+            gameOver = false; paused = false;
+            rushScore = 0; rushLevel = 1;
+            document.getElementById('rush-score').innerText = '0';
+            document.getElementById('rush-level').innerText = '1';
+            document.getElementById('rush-status').innerHTML = '🎮 Pilih karakter!';
+            if(rushInterval) clearInterval(rushInterval);
+            rushInterval = setInterval(updateRushLogic, 50);
+            if(animFrame) cancelAnimationFrame(animFrame);
+            animFrame = requestAnimationFrame(drawRush);
+
+            window.removeEventListener('keydown', rushKeyHandler);
+            window.addEventListener('keydown', rushKeyHandler);
+        }
+
+        function rushKeyHandler(e) {
+            if(!player.type || gameOver || paused) return;
+            if(e.code === 'Space') { e.preventDefault(); lompat(); }
+            if(e.code === 'ArrowDown') { e.preventDefault(); menunduk(); }
+            if(e.code === 'ArrowLeft') { e.preventDefault(); gerakKiri(); }
+            if(e.code === 'ArrowRight') { e.preventDefault(); gerakKanan(); }
+        }
+
+        function pilihKarakter(t) {
+            player.type = t;
+            document.getElementById('rush-status').innerHTML = `Karakter ${t} dipilih! Gunakan tombol.`;
+        }
+
+        function updateRushLogic() {
+            if(gameOver || paused || !player.type) return;
+
+            if(player.state === 'jump') {
+                player.y += player.vy;
+                player.vy += player.gravity;
+                if(player.y >= player.groundY) {
+                    player.y = player.groundY;
+                    player.state = 'stand';
+                }
+            } else if(player.state === 'duck') {
+                player.height = 40;
+            } else {
+                player.height = 70;
+            }
+
+            if(Math.random() < 0.02 + rushLevel*0.005) {
+                let types = ['organik','anorganik','b3'];
+                let type = types[Math.floor(Math.random()*types.length)];
+                sampahItems.push({
+                    x: rushCanvas.width,
+                    y: rushCanvas.height - 100 - 40,
+                    width: 40, height: 40,
+                    type: type,
+                    speed: 3 + rushLevel*0.5
+                });
+            }
+
+            for(let i=sampahItems.length-1; i>=0; i--) {
+                let s = sampahItems[i];
+                s.x -= s.speed;
+                if(s.x + s.width < 0) sampahItems.splice(i,1);
+            }
+
+            for(let i=sampahItems.length-1; i>=0; i--) {
+                let s = sampahItems[i];
+                if(s.x < player.x + player.width && s.x + s.width > player.x &&
+                   s.y < player.y + player.height && s.y + s.height > player.y) {
+                    if(s.type === player.type) {
+                        rushScore += 10;
+                        tambahScore(10);
+                        sampahItems.splice(i,1);
+                        if(rushScore % 50 === 0) {
+                            rushLevel++;
+                            document.getElementById('rush-level').innerText = rushLevel;
+                        }
+                        document.getElementById('rush-score').innerText = rushScore;
+                        player.frame = 5;
+                    } else {
+                        gameOver = true;
+                        showRushPopup('💥 Game Over! Skor: '+rushScore);
+                        clearInterval(rushInterval);
+                    }
+                }
+            }
+            if(player.frame > 0) player.frame--;
+        }
+
+        function drawRush() {
+            if(!ctx) return;
+            ctx.clearRect(0,0,rushCanvas.width,rushCanvas.height);
+            
+            // Langit gradien
+            let grad = ctx.createLinearGradient(0,0,0,rushCanvas.height);
+            grad.addColorStop(0,'#87CEEB'); grad.addColorStop(1,'#b0e0e6');
+            ctx.fillStyle = grad; ctx.fillRect(0,0,rushCanvas.width,rushCanvas.height);
+            
+            // Awan
+            ctx.fillStyle = 'rgba(255,255,255,0.6)';
+            ctx.beginPath(); ctx.arc(200,80,40,0,2*Math.PI); ctx.fill();
+            ctx.beginPath(); ctx.arc(250,60,35,0,2*Math.PI); ctx.fill();
+            ctx.beginPath(); ctx.arc(600,120,45,0,2*Math.PI); ctx.fill();
+            
+            // Tanah
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(0,rushCanvas.height-100,rushCanvas.width,100);
+            ctx.fillStyle = '#5D3A1A';
+            for(let i=0;i<12;i++) ctx.fillRect(i*100, rushCanvas.height-95, 30,8);
+            
+            // Sampah
+            sampahItems.forEach(s=>{
+                if(s.type==='organik') ctx.fillStyle='#4caf50';
+                else if(s.type==='anorganik') ctx.fillStyle='#ff9800';
+                else ctx.fillStyle='#f44336';
+                ctx.fillRect(s.x,s.y,s.width,s.height);
+                ctx.fillStyle='white';
+                ctx.font='20px Arial';
+                ctx.fillText(s.type==='organik'?'🍎':(s.type==='anorganik'?'🥤':'⚠️'), s.x+5, s.y+30);
+            });
+            
+            // Gambar karakter orang
+            if(player.type) {
+                let offX = player.frame>0 ? Math.random()*4-2 : 0;
+                let headY = player.y;
+                let bodyY = player.y + 30;
+                
+                // Warna berdasarkan tipe
+                if(player.type==='organik') ctx.fillStyle = '#4caf50';
+                else if(player.type==='anorganik') ctx.fillStyle = '#ff9800';
+                else ctx.fillStyle = '#f44336';
+                
+                // Kepala (lingkaran)
+                ctx.beginPath();
+                ctx.arc(player.x+20+offX, headY+15, 15, 0, 2*Math.PI);
+                ctx.fill();
+                
+                // Badan (persegi panjang)
+                ctx.fillRect(player.x+10+offX, bodyY, 20, 30);
+                
+                // Tangan
+                ctx.fillRect(player.x-5+offX, bodyY+5, 10, 10);
+                ctx.fillRect(player.x+25+offX, bodyY+5, 10, 10);
+                
+                // Kaki
+                ctx.fillRect(player.x+5+offX, bodyY+30, 8, 12);
+                ctx.fillRect(player.x+17+offX, bodyY+30, 8, 12);
+                
+                // Mata
+                ctx.fillStyle = 'white';
+                ctx.beginPath(); ctx.arc(player.x+12+offX, headY+10, 3, 0, 2*Math.PI); ctx.fill();
+                ctx.beginPath(); ctx.arc(player.x+28+offX, headY+10, 3, 0, 2*Math.PI); ctx.fill();
+                ctx.fillStyle = 'black';
+                ctx.beginPath(); ctx.arc(player.x+12+offX, headY+10, 1.5, 0, 2*Math.PI); ctx.fill();
+                ctx.beginPath(); ctx.arc(player.x+28+offX, headY+10, 1.5, 0, 2*Math.PI); ctx.fill();
+                
+                // Mulut
+                ctx.beginPath();
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 2;
+                ctx.arc(player.x+20+offX, headY+20, 5, 0.1, Math.PI-0.1);
+                ctx.stroke();
+            }
+            
+            animFrame = requestAnimationFrame(drawRush);
+        }
+
+        function gerakKiri() { if(player.x>30) { player.x-=25; player.direction = -1; } }
+        function gerakKanan() { if(player.x<rushCanvas.width-player.width-30) { player.x+=25; player.direction = 1; } }
+        function lompat() { if(player.state === 'stand' && player.type) { player.state = 'jump'; player.vy = player.jumpPower; } }
+        function menunduk() { if(player.state === 'stand' && player.type) { player.state = 'duck'; setTimeout(()=>{ if(player.state==='duck') player.state='stand'; }, 300); } }
+        function pauseGame() { paused = !paused; }
+
+        function showRushPopup(msg) {
+            document.getElementById('popup').innerHTML = `<h2>${msg}</h2><button onclick="closeRushPopup('ulang')">Ulangi</button><button onclick="closeRushPopup('menu')">Menu</button>`;
+            document.getElementById('popup').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+        }
+        function closeRushPopup(act) {
+            document.getElementById('popup').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+            if(act==='ulang') initRush();
+            else goToMenuGame();
+        }
+
+        // ================== POPUP GENERIK ==================
+        function showGenericPopup(msg, target) {
+            document.getElementById('popup').innerHTML = `<h2>${msg}</h2><button onclick="closeGenericPopup('${target}')">OK</button>`;
+            document.getElementById('popup').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+        }
+        function closeGenericPopup(target) {
+            document.getElementById('popup').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+            if(target==='menu') goToMenuGame();
+        }
+
+        // Ekspos fungsi ke global
+        window.showLogin = showLogin;
+        window.showRegister = showRegister;
+        window.register = register;
+        window.login = login;
+        window.logout = logout;
+        window.goToHome = goToHome;
+        window.goToMenuGame = goToMenuGame;
+        window.goToGame = goToGame;
+        window.hitungSampah = hitungSampah;
+        window.jawabPilahan = jawabPilahan;
+        window.nextPilahan = nextPilahan;
+        window.jawabReduce = jawabReduce;
+        window.nextReduce = nextReduce;
+        window.checkWord = checkWord;
+        window.allowDrop = allowDrop;
+        window.drag = drag;
+        window.drop = drop;
+        window.nextDrag = nextDrag;
+        window.jawabCerdas = jawabCerdas;
+        window.cekTekaGrid = cekTekaGrid;
+        window.pilihKarakter = pilihKarakter;
+        window.gerakKiri = gerakKiri;
+        window.gerakKanan = gerakKanan;
+        window.lompat = lompat;
+        window.menunduk = menunduk;
+        window.pauseGame = pauseGame;
+        window.closeGenericPopup = closeGenericPopup;
+        window.closeRushPopup = closeRushPopup;
+        window.startGame = startGame;
+    </script>
+</body>
+</html>
